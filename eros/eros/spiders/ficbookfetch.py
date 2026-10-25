@@ -9,7 +9,8 @@ class ExtractPageFicbook(scrapy.Spider):
     def __init__(self, start_url=None, *args, **kwargs):
         super(ExtractPageFicbook, self).__init__(*args, **kwargs)
             
-        self.start_urls = [start_url] 
+        self.start_urls = [start_url]
+
 
     # парсим главы из основной страницы
     def parse(self, response):

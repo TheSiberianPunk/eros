@@ -9,7 +9,9 @@ class ExtractPageLiterotica(scrapy.Spider):
     def __init__(self, start_url=None, *args, **kwargs):
         super(ExtractPageLiterotica, self).__init__(*args, **kwargs)
         
-        self.start_urls = [start_url]    
+        self.start_urls = [start_url]
+
+        return self.start_urls
 
     # точка входа: проверяем является ли это серией. если да то парсим ссылку на серию и парсим каждую ссылку там
     def parse(self, response):
