@@ -1,27 +1,45 @@
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
+import json
+
 from book_prep import sort_links_json, create_epub
 from eros.eros.spiders.literoticafetch import ExtractPageLiterotica
 from eros.eros.spiders.ficbookfetch import ExtractPageFicbook
 
-def run_spider(user_url):
+# установка настроек
+def set_settings(settings_json=None):
+    # в случае отсутствия кастомных настроек, фолбэк на настройки по умолчанию
+    if not settings_json:
+        settings_json = "./settings/default_settings.json"
+    
+    with open(settings_json,'r', encoding='utf-8') as f:
+        settings_json = json.load(f)
+
     settings = get_project_settings()
+
     settings['FEEDS'] = {
-    './eros/response.json': {
-        'format': 'json',
-        'overwrite': True,
-        }
+        './eros/response.json': {
+            'format': 'json',
+            'overwrite': True,
+            }
     }
-    settings.set('USER_AGENT', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0', priority='cmdline')
-    settings.set('AUTOTHROTTLE_ENABLED', True)
-    settings.set('AUTOTHROTTLE_START_DELAY', 5)
-    settings.set('AUTOTHROTTLE_MAX_DELAY', 60)
-    settings.set('AUTOTHROTTLE_TARGET_CONCURRENCY', 1.0)
-    settings.set('CONCURRENT_REQUESTS_PER_DOMAIN', 1)
-    settings.set('DOWNLOAD_DELAY', 5)
-    settings.set('RETRY_HTTP_CODES', [429])
-    process = CrawlerProcess(settings=settings)
+    settings.set('USER_AGENT', settings_json['USER_AGENT'], priority='cmdline')
+    settings.set('AUTOTHROTTLE_ENABLED', settings_json['AUTOTHROTTLE_ENABLED'])
+    settings.set('AUTOTHROTTLE_START_DELAY', settings_json['AUTOTHROTTLE_START_DELAY'])
+    settings.set('AUTOTHROTTLE_MAX_DELAY', settings_json['AUTOTHROTTLE_MAX_DELAY'])
+    settings.set('AUTOTHROTTLE_TARGET_CONCURRENCY', settings_json['AUTOTHROTTLE_TARGET_CONCURRENCY'])
+    settings.set('CONCURRENT_REQUESTS_PER_DOMAIN', settings_json['CONCURRENT_REQUESTS_PER_DOMAIN'])
+    settings.set('DOWNLOAD_DELAY', settings_json['DOWNLOAD_DELAY'])
+    settings.set('RETRY_HTTP_CODES', settings_json['RETRY_HTTP_CODES'])
+
+    return settings
+    
+
+
+def run_spider(user_url,  settings_json=None):
+    crawler_settings = set_settings(settings_json)
+    process = CrawlerProcess(settings=crawler_settings)
 
     try:
         if "literotica" in user_url:
